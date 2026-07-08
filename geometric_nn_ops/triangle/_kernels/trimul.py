@@ -3,8 +3,6 @@
 
 """Triton building-block kernels for triangle_multiplicative_update.
 
-Extracted verbatim from OpenFold-3 (aqlaboratory/openfold-3, main):
-``openfold3/core/model/layers/triangular_multiplicative_update.py``.
 These are fused layernorm / linear (+ sigmoid / mul / mask / add) primitives;
 depend only on ``torch`` + ``triton``. Forward-only (no autograd).
 """
