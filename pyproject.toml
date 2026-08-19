@@ -43,7 +43,7 @@ markers = [
 addopts = "-m 'not large'"
 
 [project.urls]
-"Source" = "https://github.com/AMDResearch/geometric-nn-ops"
+"Source" = "https://github.com/ROCm/geometric-nn-ops"
 
 [tool.hatch.build.targets.wheel]
 packages = ["geometric_nn_ops_torch"]
