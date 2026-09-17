@@ -131,7 +131,13 @@ def test_key_constant_parameters_cannot_reach_the_output():
     )
 
     out, _ = attention_pair_bias_torch(**tensors, scale=DH**-0.5)
-    grads = torch.autograd.grad(out.sum(), [tensors[k] for k in UNLEARNABLE])
+    # ``allow_unused`` because the projection does not build the key-constant at
+    # all any more, so these are not merely zero-gradient, they are disconnected
+    # from the graph. Either answer satisfies the claim; ``None`` is the stronger
+    # one, and is what this op should report.
+    grads = torch.autograd.grad(
+        out.sum(), [tensors[k] for k in UNLEARNABLE], allow_unused=True
+    )
 
     for name in UNLEARNABLE:
         moved = {**tensors, name: tensors[name] + 1e3}
@@ -143,8 +149,51 @@ def test_key_constant_parameters_cannot_reach_the_output():
         )
 
     for name, grad in zip(UNLEARNABLE, grads, strict=True):
-        assert grad.abs().max() < 1e-12, (
+        assert grad is None or grad.abs().max() < 1e-12, (
             f"{name} has a gradient of {grad.abs().max():.2e}"
+        )
+
+
+@requires_gpu
+def test_a_drifted_key_constant_does_not_cost_precision():
+    """The companion to the test above, and the one with teeth.
+
+    Being unlearnable means nothing bounds these parameters: the true gradient
+    is zero, so whatever an optimiser sees is rounding noise, and Adam's
+    normalised step turns that noise into a full-``lr`` walk that never returns.
+    Measured on this op, 160k Adam steps at lr 1e-3 take the key-constant from
+    0.34 to 31.7 while the fp64 output moves by 1.6e-15 -- unbounded drift, and
+    nothing learned.
+
+    That is harmless only while the constant stays out of the low-precision bias
+    tensor. bf16 spacing near |c| is |c|/256, so a constant of 1e3 quantises an
+    O(1) signal in steps of ~4 and destroys it long before the softmax gets to
+    cancel the constant. Two vendors round the noise differently, so they drift
+    apart while both remain correct -- which looks exactly like a kernel bug and
+    is not one.
+
+    So pin the invariant directly: a huge key-constant must not cost accuracy.
+    """
+    B, M, H, U, V, DH, Zc = 1, 1, 4, 32, 32, 16, 16
+    tensors = make_op_tensors(B, M, H, U, V, DH, Zc, "cuda", torch.float64, seed=3)
+    tensors.update(make_projection_biases(H, DH, "cuda", torch.float64, seed=5))
+
+    def bf16_error(t):
+        """Accuracy of the bf16 path against an fp64 gold of the same params."""
+        with torch.no_grad():
+            gold, _ = attention_pair_bias_torch(**t, scale=DH**-0.5)
+            low, _ = attention_pair_bias_torch(
+                **cast_tree(t, torch.bfloat16), scale=DH**-0.5
+            )
+        return ((low.double() - gold).norm() / gold.norm()).item()
+
+    calm = bf16_error(tensors)
+    assert calm > 0, "the bf16 path should not be exact; the test would be vacuous"
+    for name in UNLEARNABLE:
+        drifted = bf16_error({**tensors, name: tensors[name] + 1e3})
+        assert drifted < 2 * calm, (
+            f"a key-constant from {name} cost {drifted / calm:.1f}x precision "
+            f"({calm:.2e} -> {drifted:.2e}); it must not reach the bias tensor"
         )
 
 
