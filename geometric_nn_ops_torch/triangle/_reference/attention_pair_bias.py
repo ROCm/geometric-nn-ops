@@ -18,29 +18,8 @@ from geometric_nn_ops_torch.triangle._masking import mask_val
 def _project_pair_bias(z, ln_z_weight, ln_z_bias, proj_z_weight, proj_z_bias, eps):
     """z ``(B,U,V,Zc)`` -> per-head bias ``(B,H,U,V)``."""
     Zc = z.shape[-1]
-    # ``ln_z_bias`` and ``proj_z_bias`` reach the logits only as
-    #     const[h] = sum_c proj_z_weight[h, c] * ln_z_bias[c] + proj_z_bias[h]
-    # which does not depend on V. The softmax downstream reduces along V, so
-    # const cancels exactly: it cannot change the output, and its gradient is
-    # exactly zero for every input and every loss.
-    #
-    # Forming it anyway is not free. It rides in the same low-precision tensor
-    # as the signal, and bf16 spacing near |c| is |c|/256, so a large const
-    # quantises the O(1) signal away *before* the softmax gets to cancel it.
-    # And because the true gradient is zero, whatever an optimiser sees for
-    # these parameters is rounding noise -- Adam normalises by sqrt(v), so that
-    # noise still produces a full-lr step, and nothing pulls them back. Measured
-    # on this op: 160k Adam steps at lr 1e-3 walk const from 0.34 to 31.7 while
-    # the fp64 output moves by 1.6e-15 (i.e. they learn nothing), and bf16
-    # accuracy against an fp64 gold degrades 6.1x. Two vendors' kernels round
-    # the noise differently, so they drift apart while both stay correct.
-    #
-    # So never build const. Dropping it is exact, and strictly less work.
-    # NOTE: this changes the tensor returned by ``return_z_proj`` by that
-    # per-head constant. It is invisible through the softmax, which is the only
-    # documented use (see ``test_cached_pair_bias``).
-    zc = F.layer_norm(z, (Zc,), ln_z_weight, None, eps)  # (B,U,V,Zc)
-    pz = F.linear(zc, proj_z_weight, None)  # (B,U,V,H)
+    zc = F.layer_norm(z, (Zc,), ln_z_weight, ln_z_bias, eps)  # (B,U,V,Zc)
+    pz = F.linear(zc, proj_z_weight, proj_z_bias)  # (B,U,V,H)
     return pz.permute(0, 3, 1, 2).contiguous()  # (B,H,U,V)
 
 
