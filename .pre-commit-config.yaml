@@ -1,10 +1,38 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+#
 # Run `pre-commit install` once to enable these hooks on `git commit`.
-# Config lives in pyproject.toml ([tool.ruff]).
+# Ruff config lives in pyproject.toml ([tool.ruff]).
+
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+        exclude_types: ["image", "jupyter"]
+      - id: mixed-line-ending
+      - id: check-yaml
+      - id: check-merge-conflict
+        # Without this, the hook only checks during an in-progress merge.
+        args: [--assume-in-merge]
+      - id: check-added-large-files
+        # Without this, CI's --all-files run checks nothing.
+        args: [--enforce-all]
+
+  # Keep the ruff version in sync with the ruff pin in pyproject.toml
+  # ([project.optional-dependencies] dev).
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    # Keep in sync with the ruff pin in pyproject.toml ([project.optional-dependencies] dev).
-    rev: v0.16.3
+    rev: 65dbdb59d2f2d9c3bdc343c566821ad3319ddaa3  # frozen: v0.16.3
     hooks:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
+
+  # Self-hosted runner labels are declared in .github/actionlint.yaml.
+  - repo: https://github.com/rhysd/actionlint
+    rev: 0933c147c9d6587653d45fdcb4c497c57a65f9af  # frozen: v1.7.10
+    hooks:
+      - id: actionlint
+        args: [-shellcheck=]

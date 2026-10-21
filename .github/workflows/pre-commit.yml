@@ -1,0 +1,55 @@
+# Copyright Advanced Micro Devices, Inc.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Runs the repository's pre-commit hooks on pull requests and on pushes to
+# main. Hook definitions live in `.pre-commit-config.yaml`; this workflow only
+# executes them, so hooks can be added or removed without touching this file.
+
+name: pre-commit
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A new push to a PR cancels that PR's previous run. Pushes to main fall back
+# to the unique run_id and so never cancel each other.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    name: Run hooks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      # Inline rather than pre-commit/action: that composite calls
+      # actions/cache by tag, which this repo's SHA-pinning policy rejects.
+      - name: Cache pre-commit environments
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Install pre-commit
+        run: python -m pip install pre-commit==4.7.0
+
+      - name: Run pre-commit hooks
+        env:
+          # Annotate ruff violations inline; ones --fix can repair show in the diff.
+          RUFF_OUTPUT_FORMAT: github
+        run: pre-commit run --all-files --show-diff-on-failure --color=always

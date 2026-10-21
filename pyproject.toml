@@ -29,8 +29,9 @@ dependencies = [
 
 [project.optional-dependencies]
 test = ["pytest>=7", "pytest-cov>=6"]
-# Keep the ruff pin in sync with `rev` in .pre-commit-config.yaml so the hook
-# and manual runs format identically (ruff is pre-1.0; output can shift).
+# Keep the ruff pin in sync with the ruff-pre-commit `rev` SHA and its
+# `# frozen:` tag in .pre-commit-config.yaml so the hook and manual runs format
+# identically (ruff is pre-1.0; output can shift).
 dev = ["ruff==0.16.3", "pre-commit"]
 
 [tool.pytest.ini_options]

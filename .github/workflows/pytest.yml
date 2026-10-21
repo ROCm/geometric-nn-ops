@@ -7,11 +7,10 @@ on:
   push:
     branches: [main]
 
-# head_ref is set only for pull requests, so a new push to a PR cancels the
-# previous run. Pushes to main fall back to the unique run_id and so never
-# cancel each other.
+# A new push to a PR cancels that PR's previous run. Pushes to main fall back
+# to the unique run_id and so never cancel each other.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
 
 permissions:
@@ -22,6 +21,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -52,6 +53,8 @@ jobs:
       image: rocm/pytorch@sha256:3174cb7061d94c427da96c0edef4adea28046fa3f3b2ff3948dc4e995665ff8c
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       # No setup-python: the image ships 3.14 with torch in a venv on PATH.
       - name: Install
