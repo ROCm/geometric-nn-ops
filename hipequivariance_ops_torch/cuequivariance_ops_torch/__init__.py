@@ -32,7 +32,7 @@ from .attention_pair_bias_torch import attention_pair_bias
 from .triangle_attention import triangle_attention
 from .triangle_multiplicative_update import triangle_multiplicative_update
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 __all__ = [
     "attention_pair_bias",

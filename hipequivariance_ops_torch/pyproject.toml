@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hipequivariance-ops-torch"
-version = "0.1.0"
+version = "1.0.0"
 description = "Zero-code-change cuequivariance_ops_torch shim for AMD ROCm, backed by geometric-nn-ops Triton kernels."
 readme = "README.md"
 license = { text = "Apache-2.0" }

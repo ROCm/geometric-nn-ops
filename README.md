@@ -29,7 +29,7 @@ This repo ships two separately-installable packages:
 
 ## Status
 
-Project Status: Active Development. Version 0.1.0; packages are not yet
+Project Status: Active Development. Version 1.0.0; packages are not yet
 published on PyPI.
 
 | Op                               | Forward                                      | Backward                                    |
