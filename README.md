@@ -43,29 +43,85 @@ published on PyPI.
 - Linux with Python 3.12 or later.
 - PyTorch 2.13 or later and Triton 3.7 or later, built for your platform (ROCm or
   CUDA).
-- Reference environment: ROCm 10.1, Ubuntu 24.04, Python 3.12, PyTorch 2.13
-  (`rocm/pytorch:rocm10.1.0_ubuntu24.04_py3.12_pytorch_release_2.13.0`).
+
+Supported ROCm configuration:
+
+| ROCm       | Ubuntu | Python | PyTorch             | AMD Instinct GPU                                                 |
+| ---------- | ------ | ------ | ------------------- | ---------------------------------------------------------------- |
+| 10.0, 10.1 | 24.04  | 3.12   | 2.13.0 (ROCm build) | gfx942 (CDNA3 — MI300X, MI325X), gfx950 (CDNA4 — MI350X, MI355X) |
+
+The recommended environment is the ROCm 10.1 PyTorch Docker image,
+`rocm/pytorch:rocm10.1.0_ubuntu24.04_py3.12_pytorch_release_2.13.0`, which
+provides ROCm, PyTorch, and Triton.
 
 ## Installation
 
-### Package Installation
+Packages are not yet published on PyPI; build them from source. Both packages
+are pure Python, so building them does not need the ROCm compiler toolchain.
 
-Packages are not yet published on PyPI; build from source.
+> [!IMPORTANT]
+> Always pass `--no-deps` when building or installing these packages. On ROCm,
+> `triton` is provided by `pytorch-triton-rocm`, so pip would otherwise install
+> PyPI's `triton` over it, and may replace the ROCm `torch` build with PyPI's
+> CUDA one.
 
-### Build From Source
-
-Install PyTorch and Triton for your environment first, e.g. following
-https://pytorch.org/get-started/locally/. Then:
+Clone the repository on the host and start the container with the clone
+mounted:
 
 ```bash
 git clone https://github.com/ROCm/geometric-nn-ops.git
 cd geometric-nn-ops/
-# --no-deps keeps pip from installing PyPI's torch/triton over your platform's builds
+docker run -it --rm \
+  --network=host --device=/dev/kfd --device=/dev/dri --group-add video \
+  --security-opt seccomp=unconfined --ipc=host \
+  -v "$PWD":/geometric-nn-ops -w /geometric-nn-ops \
+  --name=geometric_nn_ops \
+  rocm/pytorch:rocm10.1.0_ubuntu24.04_py3.12_pytorch_release_2.13.0
+```
+
+Inside the container, build and install the wheel:
+
+```bash
+pip wheel . --no-deps -w ~/dist/  # fetches the hatchling build backend
+pip install --no-deps ~/dist/geometric_nn_ops_torch-*.whl
+```
+
+For development, or in any environment that already has ROCm (or CUDA) builds
+of PyTorch and Triton, install in editable mode instead:
+
+```bash
 pip install --no-deps -e .
 ```
 
 To also install the `cuequivariance_ops_torch` shim, see
 [hipequivariance_ops_torch/README.md](./hipequivariance_ops_torch/README.md#install).
+
+### Verify the Installation
+
+Run these outside the clone, so Python imports the installed package rather
+than the source tree in the current directory:
+
+```bash
+cd ~
+python -c 'import torch; print(f"torch={torch.__version__} cuda_available={torch.cuda.is_available()} hip={torch.version.hip}")'
+python -c 'import geometric_nn_ops_torch; print(geometric_nn_ops_torch.__version__)'
+```
+
+The first should print `cuda_available=True` and the HIP version of your
+PyTorch build; the second prints the installed package version.
+
+To run the test suite on the GPU, from the repository root
+(`/geometric-nn-ops` in the container):
+
+```bash
+pip install "pytest>=7"  # not the [test] extra, which would pull deps over --no-deps
+python -m pytest -vrxs tests
+```
+
+If you installed the shim, add `hipequivariance_ops_torch/tests` to test it too.
+Tests marked `large` need datacenter-class GPU memory and are deselected by
+default; add `-m ""` to include them. Tests against cuequivariance skip unless
+`cuequivariance-torch` is installed.
 
 ## Usage
 
