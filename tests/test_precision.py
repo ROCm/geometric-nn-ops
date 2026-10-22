@@ -16,8 +16,6 @@ import ast
 import importlib.util
 import pathlib
 import pkgutil
-from types import SimpleNamespace
-from unittest import mock
 
 import pytest
 import torch
@@ -87,20 +85,6 @@ def test_reads_ieee_when_torch_has_no_setting():
     """torch reports "none" until something is set, which is full precision.
     Nothing here sets it, so this also catches a test leaving it behind."""
     assert _precision.torch_precision() == "ieee"
-
-
-def test_reads_allow_tf32_on_torch_without_fp32_precision():
-    """The package supports torch back to 2.4, before ``fp32_precision`` existed.
-    Stubbing the module is the only way to reach that branch on a modern torch."""
-    legacy = SimpleNamespace(
-        backends=SimpleNamespace(
-            cuda=SimpleNamespace(matmul=SimpleNamespace(allow_tf32=True))
-        )
-    )
-    with mock.patch.object(_precision, "torch", legacy):
-        assert _precision.torch_precision() == "tf32"
-        legacy.backends.cuda.matmul.allow_tf32 = False
-        assert _precision.torch_precision() == "ieee"
 
 
 def test_reading_the_torch_setting_leaves_the_legacy_getters_working():

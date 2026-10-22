@@ -40,10 +40,11 @@ published on PyPI.
 
 ## Prerequisites
 
-- Linux with Python 3.10 or later.
-- PyTorch 2.4 or later and Triton 3.0 or later, built for your platform (ROCm or
+- Linux with Python 3.12 or later.
+- PyTorch 2.13 or later and Triton 3.7 or later, built for your platform (ROCm or
   CUDA).
-- ROCm 10.0, PyTorch 2.13, Python 3.14 (`rocm/pytorch` container).
+- Reference environment: ROCm 10.1, Ubuntu 24.04, Python 3.12, PyTorch 2.13
+  (`rocm/pytorch:rocm10.1.0_ubuntu24.04_py3.12_pytorch_release_2.13.0`).
 
 ## Installation
 

@@ -39,9 +39,7 @@ def torch_precision() -> str:
     a process has mixed torch's precision APIs whereas this works no matter how
     the precision was set.
     """
-    if hasattr(torch.backends.cuda.matmul, "fp32_precision"):
-        return TF32 if torch.backends.cuda.matmul.fp32_precision == TF32 else IEEE
-    return TF32 if torch.backends.cuda.matmul.allow_tf32 else IEEE
+    return TF32 if torch.backends.cuda.matmul.fp32_precision == TF32 else IEEE
 
 
 def resolve(precision: str, allowed: tuple[str, ...]) -> str:

@@ -15,3 +15,14 @@ htmlcov/
 .idea/
 .claude/
 *.code-workspace
+*.log
+
+# Secrets. Hatchling also drops ignored files from wheels, so keep modules
+# and .env.example in.
+.env
+.env.*
+!.env.example
+secrets.*
+credentials.*
+!secrets.py
+!credentials.py

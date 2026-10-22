@@ -1,5 +1,7 @@
 [build-system]
-requires = ["hatchling"]
+# A range, not a pin: distro and offline builds bring their own hatchling.
+# 1.27 is the first release writing PEP 639 license-file metadata.
+requires = ["hatchling>=1.27,<2"]
 build-backend = "hatchling.build"
 
 [project]
@@ -8,23 +10,23 @@ version = "0.1.0"
 description = "Vendor-neutral GPU kernels for geometry-aware neural nets (triangle/folding ops)"
 readme = "README.md"
 license = { text = "Apache-2.0" }
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 authors = [{ name = "Advanced Micro Devices, Inc." }]
 keywords = ["triton", "rocm", "hip", "amd", "attention", "alphafold", "openfold"]
 classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 
+# Runtime dependencies are floors, not pins: a library must co-install with the
+# torch/triton build the user already has.
 dependencies = [
-    "torch>=2.4",
-    "triton>=3.0",
+    "torch>=2.13",
+    "triton>=3.7",
 ]
 
 [project.optional-dependencies]
@@ -78,8 +80,8 @@ packages = ["geometric_nn_ops_torch"]
 [tool.ruff]
 line-length = 88  # Black/ruff default
 # Lowest supported interpreter (matches requires-python). Keeps pyupgrade (UP)
-# from rewriting to syntax newer than 3.10.
-target-version = "py310"
+# from rewriting to syntax newer than 3.12.
+target-version = "py312"
 
 [tool.ruff.lint]
 # Required for CPY001 (flake8-copyright), which is still a preview rule. Preview

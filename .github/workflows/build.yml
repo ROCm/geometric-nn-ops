@@ -1,0 +1,70 @@
+# Copyright Advanced Micro Devices, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+name: Build
+
+on:
+  # Not push+pull_request because then it runs twice for PRs from branches
+  # within the repo.
+  pull_request:
+  push:
+    branches: [main]
+
+# A new push to a PR cancels its previous run. Keyed on the PR number, not the
+# branch name, which fork PRs can share; pushes to main use the unique run_id.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install build frontend
+        run: python -m pip install --only-binary=":all:" -r .github/ci/requirements.txt
+
+      # The shim ships its own copy of the license; keep it identical.
+      - name: Check shim LICENSE matches the root
+        run: cmp LICENSE hipequivariance_ops_torch/LICENSE
+
+      - name: Build sdists and wheels
+        run: |
+          python -m build --outdir dist .
+          python -m build --outdir dist hipequivariance_ops_torch
+
+      # Guards against a packaging change that silently drops modules or the
+      # license text Apache-2.0 requires every distribution to carry.
+      - name: Check wheel contents
+        shell: python
+        run: |
+          import glob, subprocess, zipfile
+          for pattern, root, pkg in [
+              ("dist/geometric_nn_ops_torch-*.whl", "", "geometric_nn_ops_torch"),
+              ("dist/hipequivariance_ops_torch-*.whl", "hipequivariance_ops_torch/", "cuequivariance_ops_torch"),
+          ]:
+              (wheel,) = glob.glob(pattern)
+              names = zipfile.ZipFile(wheel).namelist()
+              tracked = subprocess.run(
+                  ["git", "ls-files", f"{root}{pkg}/*.py"],
+                  check=True, capture_output=True, text=True,
+              ).stdout.split()
+              expected = {path.removeprefix(root) for path in tracked}
+              assert expected, f"no tracked sources under {root}{pkg}"
+              missing = expected - set(names)
+              assert not missing, f"{wheel} lacks {sorted(missing)}"
+              assert any(n.endswith(".dist-info/licenses/LICENSE") for n in names), (
+                  f"{wheel} ships no LICENSE"
+              )
+              print(f"{wheel}: all {len(expected)} modules and the LICENSE present")

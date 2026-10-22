@@ -90,4 +90,4 @@ pip install "cuequivariance==0.9.1" "cuequivariance-torch==0.9.1"   # NVIDIA's f
 
 ## License
 
-Apache-2.0. Copyright Advanced Micro Devices, Inc. See [LICENSE](../LICENSE).
+Apache-2.0. Copyright Advanced Micro Devices, Inc. See [LICENSE](https://github.com/ROCm/geometric-nn-ops/blob/main/LICENSE).

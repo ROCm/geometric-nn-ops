@@ -22,3 +22,28 @@ updates:
         patterns: ["ROCm/rocm-security-gh*"]
       github-actions:
         patterns: ["*"]
+
+  # increase-if-necessary never raises a floor a new release already
+  # satisfies, so this only bumps exact pins such as the CI build frontend.
+  - package-ecosystem: "pip"
+    directories:
+      - "/"
+      - "/.github/ci"
+      - "/hipequivariance_ops_torch"
+    schedule:
+      interval: "weekly"
+    versioning-strategy: increase-if-necessary
+    cooldown:
+      default-days: 7
+    # `ignore` also suppresses security-update PRs (not alerts) for these
+    # dev/test-only pins: ruff moves in lockstep with the pre-commit rev, and
+    # cuequivariance is the exact API the shim is tested against.
+    ignore:
+      - dependency-name: "ruff"
+      - dependency-name: "cuequivariance"
+      - dependency-name: "cuequivariance-torch"
+    groups:
+      python-deps:
+        patterns: ["*"]
+        # One PR across both packages, so their pins cannot diverge.
+        group-by: dependency-name

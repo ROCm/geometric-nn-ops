@@ -1,5 +1,7 @@
 [build-system]
-requires = ["hatchling"]
+# A range, not a pin: distro and offline builds bring their own hatchling.
+# 1.27 is the first release writing PEP 639 license-file metadata.
+requires = ["hatchling>=1.27,<2"]
 build-backend = "hatchling.build"
 
 [project]
@@ -8,22 +10,22 @@ version = "0.1.0"
 description = "Zero-code-change cuequivariance_ops_torch shim for AMD ROCm, backed by geometric-nn-ops Triton kernels."
 readme = "README.md"
 license = { text = "Apache-2.0" }
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 authors = [{ name = "Advanced Micro Devices, Inc." }]
 keywords = ["triton", "rocm", "hip", "amd", "alphafold", "openfold", "cuequivariance"]
 classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 
+# Runtime dependencies are floors, not pins: a library must co-install with the
+# torch/triton build the user already has.
 dependencies = [
     "geometric-nn-ops-torch",
-    "torch>=2.4",
+    "torch>=2.13",
 ]
 
 [project.optional-dependencies]
