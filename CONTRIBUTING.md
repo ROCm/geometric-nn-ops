@@ -57,12 +57,12 @@ pip install -e ".[test,dev]" -e "./hipequivariance_ops_torch[test]"
 pre-commit install
 ```
 
-With ROCm PyTorch wheels, which ship Triton as `pytorch-triton-rocm`, do not
-run that first command: pip does not count `pytorch-triton-rocm` as `triton`
-and would install PyPI's `triton` over it, a build that need not match your
-PyTorch. Instead install the two
+PyTorch's ROCm wheels ship Triton as `triton-rocm` (older ones as
+`pytorch-triton-rocm`); with those, do not run that first command: pip does not
+count either as `triton` and would install PyPI's `triton` over it, a build that
+need not match your PyTorch. Instead install the two
 packages with `pip install --no-deps -e . -e ./hipequivariance_ops_torch`,
-then the tools from the extras: `pip install pytest pytest-cov ruff==0.16.3 pre-commit cuequivariance==0.9.1 cuequivariance-torch==0.9.1`.
+then the tools from the extras: `pip install "pytest>=9.0.3" pytest-cov ruff==0.16.3 pre-commit cuequivariance==0.9.1 cuequivariance-torch==0.9.1`.
 
 `pre-commit` runs the same hooks as CI: ruff lint and format, actionlint, and
 general file hygiene. Run them on demand with `pre-commit run --all-files`.
@@ -134,6 +134,12 @@ Contributors are expected to:
 Run the tests with `pytest tests hipequivariance_ops_torch/tests`. Tests marked
 `large` need datacenter-class GPU memory and are deselected by default; include
 them with `-m ""`. Most tests skip without a GPU.
+
+GPU CI runs on a single gfx1151 runner, for pushes to `main` and same-repository
+pull requests while the repository variable `RUN_GPU_TESTS` is `true`. It never covers
+the supported gfx942 and gfx950 architectures, so a change to kernel code must
+report local GPU test results on both in the pull request, or ask a maintainer to
+run them.
 
 ### Documentation
 

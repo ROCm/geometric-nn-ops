@@ -30,7 +30,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-    "pytest>=7",
+    "pytest>=9.0.3",
     "cuequivariance==0.9.1",
     "cuequivariance-torch==0.9.1",
 ]

@@ -1,3 +1,6 @@
+# Copyright Advanced Micro Devices, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 name: Tests
 
 on:
@@ -6,6 +9,9 @@ on:
   pull_request:
   push:
     branches: [main]
+  # Lets anyone with write access probe the GPU runner without setting
+  # RUN_GPU_TESTS.
+  workflow_dispatch:
 
 # A new push to a PR cancels that PR's previous run. Pushes to main fall back
 # to the unique run_id and so never cancel each other.
@@ -19,6 +25,7 @@ permissions:
 jobs:
   pytest-cpu:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -46,6 +53,16 @@ jobs:
 
 
   pytest-gpu:
+    # Kill switch for the single self-hosted GPU runner; skips fork PRs by default.
+    # A PR runs its own copy of this file and can drop the guard, so keeping fork
+    # code off the machine rests on the fork-PR approval and runner-group settings.
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      || (vars.RUN_GPU_TESTS == 'true'
+          && (github.event_name == 'push'
+              || github.event.pull_request.head.repo.full_name == github.repository))
+    # Covers pulling the ~25 GB image on a cold runner.
+    timeout-minutes: 60
     runs-on:
       - linux-gfx1151-gpu-rocm
     container:

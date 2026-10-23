@@ -114,7 +114,7 @@ To run the test suite on the GPU, from the repository root
 (`/geometric-nn-ops` in the container):
 
 ```bash
-pip install "pytest>=7"  # not the [test] extra, which would pull deps over --no-deps
+pip install "pytest>=9.0.3"  # not the [test] extra, which would pull deps over --no-deps
 python3 -m pytest -vrxs tests
 ```
 
