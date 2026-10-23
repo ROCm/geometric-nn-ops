@@ -60,10 +60,10 @@ Packages are not yet published on PyPI; build them from source. Both packages
 are pure Python, so building them does not need the ROCm compiler toolchain.
 
 > [!IMPORTANT]
-> Always pass `--no-deps` when building or installing these packages. On ROCm,
-> `triton` is provided by `pytorch-triton-rocm`, so pip would otherwise install
-> PyPI's `triton` over it, and may replace the ROCm `torch` build with PyPI's
-> CUDA one.
+> Always pass `--no-deps` when building or installing these packages. pip
+> checks the `torch` and `triton` requirements by package name, and ROCm Triton
+> is also shipped as `triton-rocm` or `pytorch-triton-rocm`; when a requirement
+> looks unmet, pip installs PyPI's CUDA builds over the ROCm ones.
 
 Clone the repository on the host and start the container with the clone
 mounted:
@@ -103,8 +103,8 @@ than the source tree in the current directory:
 
 ```bash
 cd ~
-python -c 'import torch; print(f"torch={torch.__version__} cuda_available={torch.cuda.is_available()} hip={torch.version.hip}")'
-python -c 'import geometric_nn_ops_torch; print(geometric_nn_ops_torch.__version__)'
+python3 -c 'import torch; print(f"torch={torch.__version__} cuda_available={torch.cuda.is_available()} hip={torch.version.hip}")'
+python3 -c 'import geometric_nn_ops_torch; print(geometric_nn_ops_torch.__version__)'
 ```
 
 The first should print `cuda_available=True` and the HIP version of your
@@ -115,7 +115,7 @@ To run the test suite on the GPU, from the repository root
 
 ```bash
 pip install "pytest>=7"  # not the [test] extra, which would pull deps over --no-deps
-python -m pytest -vrxs tests
+python3 -m pytest -vrxs tests
 ```
 
 If you installed the shim, add `hipequivariance_ops_torch/tests` to test it too.
