@@ -1,0 +1,19 @@
+# Anywhere {branch} is used, the branch name will be substituted.
+# These comments will also be removed.
+
+defaults:
+  numbered: False
+root: index
+subtrees:
+
+- caption: Introduction
+  entries:
+  - file: about/what-is-geometric-nn-ops
+
+- caption: Install
+  entries:
+  - file: install/geometric-nn-ops-install
+
+- caption: About
+  entries:
+  - file: license
