@@ -8,20 +8,16 @@
 geometric-nn-ops on ROCm documentation
 ********************************************************************
 
-Accelerate geometry-aware neural networks, such as protein structure prediction
-models, with portable Triton GPU kernels that run on AMD GPUs with ROCm.
-
 geometric-nn-ops is a library of vendor-neutral GPU kernels, with both forward
-and backward passes, for geometry-aware neural networks. The kernels are written
-in `Triton <https://triton-lang.org/>`__, so the same source runs on AMD GPUs
-with ROCm and on NVIDIA GPUs with CUDA.
+and backward passes, for geometry-aware neural networks such as protein structure prediction
+models. The kernels are written in `Triton <https://triton-lang.org/>`__ and have been validated and optimized for AMD GPUs.
 
 The first kernel family, ``geometric_nn_ops_torch.triangle``, covers the triangle
 operations at the core of AlphaFold-style protein folding models:
 ``triangle_attention``, ``triangle_multiplicative_update``, and
 ``attention_pair_bias``. The kernels are exposed through a PyTorch API, and an
 optional compatibility package, ``hipequivariance-ops-torch``, lets code written
-against NVIDIA's ``cuequivariance_ops_torch`` run on AMD GPUs without source
+against ``cuequivariance_ops_torch`` run on AMD GPUs without source
 changes.
 
 .. note::

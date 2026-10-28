@@ -37,14 +37,14 @@ To use geometric-nn-ops 1.0.0, you need the following prerequisites:
      - 24.04
      - 3.12
      - MI300X, MI325X, and MI355X
-     - 2.13
-     - 3.7 or later
+     - 2.13.0
+     - 3.7.1
    * - 10.1.0
      - 24.04
      - 3.12
      - MI300X, MI325X, and MI355X
-     - 2.13
-     - 3.7 or later
+     - 2.13.0
+     - 3.7.1
 
 The installation steps on this page are validated with the
 ``rocm/pytorch:rocm10.0_ubuntu24.04_py3.12_pytorch_release_2.13.0``
@@ -194,8 +194,7 @@ container from the previous section.
 Install the cuequivariance compatibility package (optional)
 ====================================================================
 
-The ``hipequivariance-ops-torch`` package implements the API of NVIDIA's
-``cuequivariance_ops_torch`` module and routes calls to the geometric-nn-ops
+The ``hipequivariance-ops-torch`` package implements the ``cuequivariance_ops_torch`` module API and routes calls to the geometric-nn-ops
 kernels. With it installed, unmodified code that uses ``cuequivariance_torch``,
 for example ``from cuequivariance_torch.primitives.triangle import
 triangle_attention``, runs on AMD GPUs.
@@ -232,7 +231,7 @@ your code already depends on cuequivariance. Otherwise, use
 
             pip install --no-deps -e ./hipequivariance_ops_torch
 
-3. Install NVIDIA's cuequivariance Python front end. The shim is designed for
+3. Install the cuequivariance Python front end. The shim is designed for
    version 0.9.1 and warns at import time if a different version of
    ``cuequivariance-torch`` is installed.
 
@@ -286,20 +285,27 @@ Run the tests
 ---------------------------------------
 
 The test suite runs on the GPU and checks the kernels against reference
-implementations. To run it, install ``pytest`` and run the tests from the root
-of the cloned repository.
+implementations.
+
+Install ``pytest`` on its own rather than through the packages' ``[test]``
+extras. This ensures that ``pip`` doesn't pull in other dependencies over your
+``--no-deps`` installation.
+
+Run the tests from the root of the cloned repository.
 
 .. code-block:: bash
 
-   pip install "pytest>=9.0.3"
+   pip install "pytest==9.0.3"
    python3 -m pytest -vrxs tests
 
 The tests import ``geometric_nn_ops_torch`` from the source tree in the current
-directory, not from an installed wheel; step 2 above checks the installation.
+directory, not from an installed wheel.
 
-Install ``pytest`` on its own rather than through the packages' ``[test]``
-extras, so that ``pip`` does not pull in other dependencies over your
-``--no-deps`` installation.
+.. note::
+
+  Two ``fp16`` tests are expected to fail and appear as ``2 xfailed`` in the
+  ``pytest`` summary. They cover fully masked rows, where softmax is undefined,
+  and do not affect normal use.
 
 Tests that compare against cuequivariance are skipped unless the
 ``cuequivariance-torch`` package is installed. Tests marked ``large`` are
@@ -307,7 +313,7 @@ deselected by default because they need datacenter-class GPU memory and take a
 long time to run. To include them, add ``-m ""`` to the ``pytest`` command
 above.
 
-If you installed the ``hipequivariance-ops-torch`` package, also run its tests:
+Use the following command to run tests for the ``hipequivariance-ops-torch`` package:
 
 .. code-block:: bash
 

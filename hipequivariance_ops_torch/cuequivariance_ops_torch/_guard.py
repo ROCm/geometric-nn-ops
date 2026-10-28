@@ -3,8 +3,8 @@
 
 """Import-time safety checks for the cuequivariance_ops_torch shim.
 
-This package shadows the ``cuequivariance_ops_torch`` module. Two hazards we
-guard against:
+This package provides a module named ``cuequivariance_ops_torch``. Two hazards
+we guard against:
 
 1. A real ``cuequivariance-ops-torch-*`` wheel is also installed. If two packages
    claim the same import name, whichever wins is nondeterministic. Fail loudly

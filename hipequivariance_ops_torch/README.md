@@ -7,10 +7,21 @@ This is an *optional convenience* package. The real compute — and the
 recommended integration path — lives in the `geometric-nn-ops-torch` package. We
 recommend a direct dependency on that API instead where possible.
 
+## About this package
+
+`hipequivariance-ops-torch` is an independent compatibility layer developed by
+AMD. It provides a Python module named `cuequivariance_ops_torch` that implements
+the triangle operations `cuequivariance-torch` 0.9.1 imports from that module,
+and forwards each call to `geometric-nn-ops-torch`. Function signatures, the
+`TriMulPrecision` enum and the `CUEQ_*_FALLBACK_THRESHOLD` constant names follow
+cuEquivariance's public interface and documentation (`cuequivariance-torch` is
+Copyright 2024 NVIDIA Corporation & Affiliates, Apache-2.0); everything else is
+AMD-authored. This package is not affiliated with or endorsed by NVIDIA.
+
 ## What it does
 
 `hipequivariance-ops-torch` installs a Python package that implements the
-`cuequivariance_ops_torch` API under the same name module name and provides the
+`cuequivariance_ops_torch` API under the same module name and provides the
 symbols `cuequivariance_torch` imports:
 
 - `triangle_attention` — routed to `geometric-nn-ops`

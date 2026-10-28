@@ -21,7 +21,7 @@ This repo ships two separately-installable packages:
   vendor-neutral API. This is the recommended dependency.
 - **`hipequivariance-ops-torch`**: an optional zero-code-change shim that
   implements the API of NVIDIA's `cuequivariance_ops_torch` under the same
-  module name routes into these kernels. It translates any API differences. See
+  module name and routes calls into these kernels. It translates any API differences. See
   [hipequivariance_ops_torch/README.md](./hipequivariance_ops_torch/README.md).
   This is provided as a convenience for codebases already integrated with
   `cuequivariance`. For long term stability, we suggest using the direct
@@ -40,17 +40,16 @@ published on PyPI.
 
 ## Prerequisites
 
-- Linux with Python 3.12 or later.
-- PyTorch 2.13 or later and Triton 3.7 or later, built for your platform (ROCm or
-  CUDA).
+- Linux with Python 3.12.
+- PyTorch 2.13.0 and Triton 3.7.1, built for your platform (ROCm or CUDA).
 
 Supported ROCm configuration:
 
 | ROCm       | Ubuntu | Python | PyTorch             | AMD Instinct GPU                                                 |
 | ---------- | ------ | ------ | ------------------- | ---------------------------------------------------------------- |
-| 10.0, 10.1 | 24.04  | 3.12   | 2.13.0 (ROCm build) | gfx942 (CDNA3 — MI300X, MI325X), gfx950 (CDNA4 — MI350X, MI355X) |
+| 10.0.0, 10.1.0 | 24.04  | 3.12   | 2.13.0 (ROCm build) | gfx942 (CDNA3 — MI300X, MI325X), gfx950 (CDNA4 — MI350X, MI355X) |
 
-The recommended environment is the ROCm 10.1 PyTorch Docker image,
+The recommended environment is the ROCm 10.1.0 PyTorch Docker image,
 `rocm/pytorch:rocm10.1.0_ubuntu24.04_py3.12_pytorch_release_2.13.0`, which
 provides ROCm, PyTorch, and Triton.
 
@@ -114,9 +113,14 @@ To run the test suite on the GPU, from the repository root
 (`/geometric-nn-ops` in the container):
 
 ```bash
-pip install "pytest>=9.0.3"  # not the [test] extra, which would pull deps over --no-deps
+pip install "pytest==9.0.3"  # not the [test] extra, which would pull deps over --no-deps
 python3 -m pytest -vrxs tests
 ```
+
+> [!NOTE]
+> Two `fp16` tests are expected to fail and appear as `2 xfailed` in the pytest
+> summary. They cover fully masked rows, where softmax is undefined, and do not
+> affect normal use.
 
 If you installed the shim, add `hipequivariance_ops_torch/tests` to test it too.
 Tests marked `large` need datacenter-class GPU memory and are deselected by
@@ -165,6 +169,18 @@ Contributions are welcome! Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) for 
 development workflow, coding standards, and how to submit pull requests. By
 participating you agree to abide by the
 [code of conduct](https://github.com/ROCm/TheRock/blob/main/GOVERNANCE.md#code-of-conduct).
+
+## Owners
+
+| GitHub ID |
+|------|
+| GMNGeoffrey |
+| singagan |
+| rtmadduri |
+| demandal25 |
+| mukh1l |
+| zhihuidu-amd |
+| yaoliu13 |
 
 ## Security
 
