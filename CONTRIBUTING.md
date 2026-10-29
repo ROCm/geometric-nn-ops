@@ -62,7 +62,7 @@ PyTorch's ROCm wheels ship Triton as `triton-rocm` (older ones as
 count either as `triton` and would install PyPI's `triton` over it, a build that
 need not match your PyTorch. Instead install the two
 packages with `pip install --no-deps -e . -e ./hipequivariance_ops_torch`,
-then the tools from the extras: `pip install "pytest>=9.0.3" pytest-cov ruff==0.16.3 pre-commit cuequivariance==0.9.1 cuequivariance-torch==0.9.1`.
+then the tools from the extras: `pip install "pytest==9.0.3" "pytest-cov==6.*" ruff==0.16.3 pre-commit cuequivariance==0.9.1 cuequivariance-torch==0.9.1`.
 
 `pre-commit` runs the same hooks as CI: ruff lint and format, actionlint, and
 general file hygiene. Run them on demand with `pre-commit run --all-files`.

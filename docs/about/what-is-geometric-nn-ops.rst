@@ -13,8 +13,7 @@ neural networks. Each operation provides a forward pass and a backward pass, and
 
 The kernels are written in `Triton <https://triton-lang.org/>`__ and called
 through a PyTorch API. Because Triton compiles the same kernel source for
-different GPU backends, geometric-nn-ops runs on AMD GPUs with ROCm and on
-NVIDIA GPUs with CUDA from a single code base.
+different GPU backends, geometric-nn-ops is vendor agnostic. The geometric-nn-ops AMD Life Science release has been validated and optimized for AMD GPUs.
 
 Kernels are grouped into families where each family is a submodule of
 ``geometric_nn_ops_torch``. The first family,
@@ -28,11 +27,10 @@ geometric-nn-ops kernels provide the following advantages:
   kernels for pair-representation models. The fused kernels avoid materializing
   large intermediate tensors.
 
-- A single Triton code base runs on AMD GPUs and on NVIDIA GPUs, so models
-  don't need vendor-specific kernel paths.
+- The Triton code base is vendor-neutral. Models don't need vendor-specific kernel paths.
 
 - The ``hipequivariance-ops-torch`` compatibility package lets existing code
-  written against NVIDIA's ``cuequivariance_ops_torch`` run on AMD GPUs without
+  written against ``cuequivariance_ops_torch`` run on AMD GPUs without
   source changes.
 
 Features
@@ -83,9 +81,6 @@ geometric-nn-ops is designed for the following scenarios:
 - **Porting cuequivariance-based code to AMD GPUs:** Run existing
   ``cuequivariance_torch`` code on ROCm through the
   ``hipequivariance-ops-torch`` compatibility package.
-
-- **Cross-vendor deployments:** Use one kernel implementation across AMD and
-  NVIDIA GPUs.
 
 .. _geometric-nn-ops-support-matrix:
 

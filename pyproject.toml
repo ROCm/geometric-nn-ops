@@ -10,27 +10,23 @@ version = "1.0.0"
 description = "Vendor-neutral GPU kernels for geometry-aware neural nets (triangle/folding ops)"
 readme = "README.md"
 license = { text = "Apache-2.0" }
-requires-python = ">=3.12"
+requires-python = "==3.12.*"
 authors = [{ name = "Advanced Micro Devices, Inc." }]
 keywords = ["triton", "rocm", "hip", "amd", "attention", "alphafold", "openfold"]
 classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 
-# Runtime dependencies are floors, not pins: a library must co-install with the
-# torch/triton build the user already has.
 dependencies = [
-    "torch>=2.13",
-    "triton>=3.7",
+    "torch==2.13.0",
+    "triton==3.7.1",
 ]
 
 [project.optional-dependencies]
-test = ["pytest>=9.0.3", "pytest-cov>=6"]
+test = ["pytest==9.0.3", "pytest-cov==6.*"]
 # Keep the ruff pin in sync with the ruff-pre-commit `rev` SHA and its
 # `# frozen:` tag in .pre-commit-config.yaml so the hook and manual runs format
 # identically (ruff is pre-1.0; output can shift).

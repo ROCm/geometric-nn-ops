@@ -33,8 +33,8 @@ jobs:
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          # Oldest supported Python version, whereas GPU job uses newest. Some
-          # expanded coverage at the cost of more variables changing at once.
+          # The supported Python version (requires-python is 3.12.*); the
+          # GPU job's image ships the same.
           python-version: "3.12"
           cache: pip
           cache-dependency-path: |
@@ -66,16 +66,16 @@ jobs:
     runs-on:
       - linux-gfx1151-gpu-rocm
     container:
-      # rocm10.0_ubuntu26.04_py3.14_pytorch_release_2.13.0
-      image: rocm/pytorch@sha256:3174cb7061d94c427da96c0edef4adea28046fa3f3b2ff3948dc4e995665ff8c
+      # rocm10.1.0_ubuntu24.04_py3.12_pytorch_release_2.13.0
+      image: rocm/pytorch@sha256:b11c021675620aa82d1eaa2d1e78387dde7521bb5b972ce0ad47b6b004d4e7aa
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      # No setup-python: the image ships 3.14 with torch in a venv on PATH.
+      # No setup-python: the image ships 3.12 with torch in a venv on PATH.
       - name: Install
-        run: python -m pip install --only-binary=":all:" -e ".[test]" -e "./hipequivariance_ops_torch[test]"
+        run: python3 -m pip install --only-binary=":all:" -e ".[test]" -e "./hipequivariance_ops_torch[test]"
 
       - name: Show torch build
         run: python -c 'import torch; print(f"{torch.__version__=}, {torch.cuda.is_available()=}, {torch.cuda.device_count()=}, {torch.version.hip=}, {torch.cuda.get_arch_list()=}")'
