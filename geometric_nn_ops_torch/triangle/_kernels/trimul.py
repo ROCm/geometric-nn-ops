@@ -10,12 +10,7 @@ depend only on ``torch`` + ``triton``. Forward-only (no autograd).
 import torch
 
 from geometric_nn_ops_torch import _precision
-
-# For now we reuse this from the pure torch implementation.
-from geometric_nn_ops_torch.triangle._reference.trimul import (
-    _combine_projections,
-    is_outgoing,
-)
+from geometric_nn_ops_torch.triangle._reference.trimul import is_outgoing
 
 try:
     import triton
@@ -280,6 +275,7 @@ def triton_linear_fused(
     mask: torch.Tensor | None = None,
     add_tensor: torch.Tensor | None = None,
     apply_sigmoid: bool = False,
+    channel_major: bool = False,
 ) -> torch.Tensor:
     """
     Fused linear layer with optional sigmoid, elementwise multiply, mask, and add.
@@ -295,9 +291,15 @@ def triton_linear_fused(
         mask: Optional mask tensor (broadcastable with output)
         add_tensor: Optional tensor to add to result (same shape as output)
         apply_sigmoid: Whether to apply sigmoid to linear result
+        channel_major: Return ``[N, *leading]`` with the flattened leading dims
+            contiguous, instead of ``[*leading, N]``. The combine wants its
+            operands with a pair dim innermost, and producing them that way
+            here avoids a transposing copy later. The kernel already stores
+            through ``stride_om``/``stride_on``, so this only changes which
+            buffer it is handed.
 
     Returns:
-        Output tensor [..., N]
+        Output tensor [..., N], or [N, ...] when ``channel_major``.
     """
     input_shape = x.shape
     K = input_shape[-1]
@@ -305,7 +307,15 @@ def triton_linear_fused(
     N = weight.shape[0]
 
     x_2d = x.reshape(M, K).contiguous()
-    output_2d = torch.empty((M, N), dtype=x.dtype, device=x.device)
+    if channel_major:
+        # [N, M] buffer, viewed as [M, N] so the kernel's indexing is unchanged.
+        # Writing this way is also faster than row-major: a program stores
+        # BLOCK_M contiguous elements per channel rather than BLOCK_N elements
+        # strided across cache lines.
+        channel_major_buf = torch.empty((N, M), dtype=x.dtype, device=x.device)
+        output_2d = channel_major_buf.T
+    else:
+        output_2d = torch.empty((M, N), dtype=x.dtype, device=x.device)
 
     BLOCK_M = min(128, triton.next_power_of_2(M))
     BLOCK_N = min(64, triton.next_power_of_2(N))
@@ -397,8 +407,36 @@ def triton_linear_fused(
         MATMUL_PRECISION=matmul_precision,
     )
 
+    if channel_major:
+        # reshape() would copy here, since output_2d is a transposed view.
+        return channel_major_buf.reshape((N,) + tuple(input_shape[:-1]))
+
     output_shape = input_shape[:-1] + (N,)
     return output_2d.reshape(output_shape)
+
+
+def _combine_channel_major(a, b, outgoing):
+    """The triangle combine on ``[C, *batch, N, N]`` operands, without copies.
+
+    ``_combine_projections`` carries pair tensors as ``[*, N, N, C]`` and
+    permutes them to put the channel outermost. After that permute neither
+    contracted dim is unit-stride, so the product is not expressible as a
+    strided batched GEMM and torch materialises contiguous copies of both
+    operands and of the result. Measured on MI300X at N=768 that layout traffic
+    is 92% of the combine, running at ~190 GB/s against the ~2900 GB/s the same
+    volume reaches as a plain copy.
+
+    Receiving the operands channel-major instead makes the contraction a plain
+    batched GEMM: transposing the last two dims of a contiguous tensor leaves
+    one of them unit-stride, which BLAS consumes directly.
+
+    Writing ``a[b,i,j,c]`` for the original layout, the two directions are
+        outgoing  out[c,b,i,k] = sum_j a[b,i,j,c] b[b,k,j,c]  ->  A @ B^T
+        incoming  out[c,b,i,k] = sum_j a[b,j,i,c] b[b,j,k,c]  ->  A^T @ B
+    """
+    if outgoing:
+        return torch.matmul(a, b.transpose(-1, -2))
+    return torch.matmul(a.transpose(-1, -2), b)
 
 
 def trimul_triton(
@@ -436,10 +474,24 @@ def trimul_triton(
     pg = triton_linear_fused(
         z, g_in_weight, precision, bias=g_in_bias, apply_sigmoid=True
     )
-    p = triton_linear_fused(z, p_in_weight, precision, bias=p_in_bias, other=pg, mask=m)
-    a = p[..., :c_hidden]
-    b = p[..., c_hidden:]
-    o = _combine_projections(a, b, outgoing)
+    # Channel-major puts a pair dim innermost, which is what the combine's GEMM
+    # needs. `other` and `mask` keep their own strides, so they stay row-major.
+    p = triton_linear_fused(
+        z,
+        p_in_weight,
+        precision,
+        bias=p_in_bias,
+        other=pg,
+        mask=m,
+        channel_major=True,
+    )
+    # Splitting on the channel axis now slices contiguous blocks rather than
+    # striding across the innermost dim.
+    a = p[:c_hidden]
+    b = p[c_hidden:]
+    o = _combine_channel_major(a, b, outgoing)
+    # The out layer norm normalises over the last dim, so it needs [*, N, N, C].
+    o = o.permute(*range(1, o.ndim), 0).contiguous()
     o = triton_layernorm(o, norm_out_weight, norm_out_bias, eps)
     o = triton_linear_fused(o, p_out_weight, precision, bias=p_out_bias)
     g = triton_linear_fused(
