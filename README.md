@@ -170,21 +170,16 @@ development workflow, coding standards, and how to submit pull requests. By
 participating you agree to abide by the
 [code of conduct](https://github.com/ROCm/TheRock/blob/main/GOVERNANCE.md#code-of-conduct).
 
-## Owners
-
-| GitHub ID |
-|------|
-| GMNGeoffrey |
-| singagan |
-| rtmadduri |
-| demandal25 |
-| mukh1l |
-| zhihuidu-amd |
-| yaoliu13 |
-
 ## Security
 
 Please follow [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
+
+## Maintainers
+
+| Role           | Contact                                                    |
+| -------------- | ---------------------------------------------------------- |
+| Technical Lead | @GMNGeoffrey, @singagan                                    |
+| Maintainer     | @demandal25, @zhihuidu-amd, @rtmadduri, @mukh1l, @yaoliu13 |
 
 ## License
 
