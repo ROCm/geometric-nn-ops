@@ -3,6 +3,10 @@
 #
 # Dependabot version updates. See
 # https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
+#
+# Paused: open-pull-requests-limit 0 stops all version-update PRs, so the
+# schedules, cooldowns and groups below are idle. Security-update PRs are off
+# in repository settings, so Dependabot raises alerts only.
 
 version: 2
 updates:
@@ -10,6 +14,7 @@ updates:
     # "/" covers .github/workflows; composite actions keep their own `uses:`
     # pins, so .github/actions has to be listed separately to get bumped.
     directory: "/"
+    open-pull-requests-limit: 0
     schedule:
       interval: "daily"
       # Wait a week before adopting newly released action versions.
@@ -30,6 +35,7 @@ updates:
       - "/"
       - "/.github/ci"
       - "/hipequivariance_ops_torch"
+    open-pull-requests-limit: 0
     schedule:
       interval: "weekly"
     versioning-strategy: increase-if-necessary
