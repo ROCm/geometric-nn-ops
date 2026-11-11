@@ -38,13 +38,13 @@ To use geometric-nn-ops 1.0.0, you need the following prerequisites:
      - 3.12
      - MI300X, MI325X, and MI355X
      - 2.13.0
-     - 3.7.1
+     - 3.8.0
    * - 10.1.0
      - 24.04
      - 3.12
      - MI300X, MI325X, and MI355X
      - 2.13.0
-     - 3.7.1
+     - 3.8.0
 
 The installation steps on this page are validated with the
 ``rocm/pytorch:rocm10.0_ubuntu24.04_py3.12_pytorch_release_2.13.0``

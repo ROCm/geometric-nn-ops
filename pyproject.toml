@@ -22,7 +22,7 @@ classifiers = [
 
 dependencies = [
     "torch==2.13.0",
-    "triton==3.7.1",
+    "triton==3.8.0",
 ]
 
 [project.optional-dependencies]
