@@ -15,9 +15,8 @@ This topic discusses how to install geometric-nn-ops using the following options
 
 .. note::
 
-  The geometric-nn-ops packages are not yet published on PyPI. Until they are,
-  build and install them from the source repository using one of the options on
-  this page.
+  geometric-nn-ops 1.0.0 is not yet released on PyPI. Build and install it from
+  the source repository using one of the options on this page.
 
 System requirements
 ====================================================================
@@ -38,13 +37,13 @@ To use geometric-nn-ops 1.0.0, you need the following prerequisites:
      - 3.12
      - MI300X, MI325X, and MI355X
      - 2.13.0
-     - 3.7.1
+     - 3.8.0
    * - 10.1.0
      - 24.04
      - 3.12
      - MI300X, MI325X, and MI355X
      - 2.13.0
-     - 3.7.1
+     - 3.8.0
 
 The installation steps on this page are validated with the
 ``rocm/pytorch:rocm10.0_ubuntu24.04_py3.12_pytorch_release_2.13.0``

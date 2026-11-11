@@ -61,7 +61,7 @@ fast path).
 
 ## Install
 
-Packages are not yet published on PyPI. Installing the shim is deliberately
+Installing the shim is deliberately
 separate from the main package and it is never pulled in implicitly. It raises
 at import if a `cuequivariance-ops-torch-*` wheel is detected as installed, and
 warns if the installed `cuequivariance-torch` differs from the version it was
@@ -82,11 +82,12 @@ pip install "cuequivariance==0.9.1" "cuequivariance-torch==0.9.1"   # NVIDIA's f
 # do NOT install cuequivariance-ops-torch-cu12 / -cu13
 ```
 
-### Once Packages Are Published on PyPI
+### Once 1.0.0 Is Published on PyPI
 
 ```bash
-pip install geometric-nn-ops-torch  # the kernels (required)
-pip install hipequivariance-ops-torch  # this shim (provides cuequivariance_ops_torch module)
+# Install PyTorch and Triton for your environment, e.g. following https://pytorch.org/get-started/locally/
+pip install --no-deps "geometric-nn-ops-torch==1.0.0"  # the kernels (required)
+pip install --no-deps "hipequivariance-ops-torch==1.0.0"  # this shim (provides cuequivariance_ops_torch module)
 pip install "cuequivariance==0.9.1" "cuequivariance-torch==0.9.1"   # NVIDIA's frontend python
 # do NOT install cuequivariance-ops-torch-cu12 / -cu13
 ```

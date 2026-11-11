@@ -29,8 +29,7 @@ This repo ships two separately-installable packages:
 
 ## Status
 
-Project Status: Active Development. Version 1.0.0; packages are not yet
-published on PyPI.
+Project Status: Active Development. Version 1.0.0, not yet released on PyPI.
 
 | Op                               | Forward                                      | Backward                                    |
 | -------------------------------- | -------------------------------------------- | ------------------------------------------- |
@@ -41,7 +40,8 @@ published on PyPI.
 ## Prerequisites
 
 - Linux with Python 3.12.
-- PyTorch 2.13.0 and Triton 3.7.1, built for your platform (ROCm or CUDA).
+- PyTorch 2.13.0 built for ROCm, and the Triton build that ships with it (3.8.0
+  in the ROCm 10.0.0 and 10.1.0 PyTorch images).
 
 Supported ROCm configuration:
 
@@ -55,8 +55,8 @@ provides ROCm, PyTorch, and Triton.
 
 ## Installation
 
-Packages are not yet published on PyPI; build them from source. Both packages
-are pure Python, so building them does not need the ROCm compiler toolchain.
+Build the packages from source. Both packages are pure Python, so building them
+does not need the ROCm compiler toolchain.
 
 > [!IMPORTANT]
 > Always pass `--no-deps` when building or installing these packages. pip
@@ -85,8 +85,8 @@ pip wheel . --no-deps -w ~/dist/  # fetches the hatchling build backend
 pip install --no-deps ~/dist/geometric_nn_ops_torch-*.whl
 ```
 
-For development, or in any environment that already has ROCm (or CUDA) builds
-of PyTorch and Triton, install in editable mode instead:
+For development, or in any environment that already has ROCm builds of PyTorch
+and Triton, install in editable mode instead:
 
 ```bash
 pip install --no-deps -e .
