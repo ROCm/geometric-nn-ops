@@ -29,7 +29,8 @@ This repo ships two separately-installable packages:
 
 ## Status
 
-Project Status: Active Development. Version 1.0.0, not yet released on PyPI.
+Project Status: Active Development. Version 1.0.0; packages are not yet
+published on PyPI.
 
 | Op                               | Forward                                      | Backward                                    |
 | -------------------------------- | -------------------------------------------- | ------------------------------------------- |
@@ -55,8 +56,8 @@ provides ROCm, PyTorch, and Triton.
 
 ## Installation
 
-Build the packages from source. Both packages are pure Python, so building them
-does not need the ROCm compiler toolchain.
+Packages are not yet published on PyPI; build them from source. Both packages
+are pure Python, so building them does not need the ROCm compiler toolchain.
 
 > [!IMPORTANT]
 > Always pass `--no-deps` when building or installing these packages. pip

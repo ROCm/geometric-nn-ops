@@ -15,8 +15,9 @@ This topic discusses how to install geometric-nn-ops using the following options
 
 .. note::
 
-  geometric-nn-ops 1.0.0 is not yet released on PyPI. Build and install it from
-  the source repository using one of the options on this page.
+  The geometric-nn-ops packages are not yet published on PyPI. Until they are,
+  build and install them from the source repository using one of the options on
+  this page.
 
 System requirements
 ====================================================================
